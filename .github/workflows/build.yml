@@ -74,45 +74,53 @@ jobs:
         prerelease: false
 
     - name: Upload Windows Portable EXE
-      if: exists('dist-electron/BoxAttack.exe')
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist-electron/BoxAttack.exe
-        asset_name: BoxAttack.exe
-        asset_content_type: application/octet-stream
+      run: |
+        if [ -f "dist-electron/BoxAttack.exe" ]; then
+          echo "Uploading BoxAttack.exe..."
+          curl -X POST "${{ steps.create_release.outputs.upload_url }}" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/octet-stream" \
+            -F "asset=@dist-electron/BoxAttack.exe" \
+            -F "name=BoxAttack.exe"
+        else
+          echo "BoxAttack.exe not found, skipping..."
+        fi
 
     - name: Upload Windows Installer
-      if: exists('dist-electron/盒打击 Setup 0.0.0.exe')
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist-electron/盒打击 Setup 0.0.0.exe
-        asset_name: BoxAttack-Setup.exe
-        asset_content_type: application/octet-stream
+      run: |
+        if [ -f "dist-electron/盒打击 Setup 0.0.0.exe" ]; then
+          echo "Uploading 盒打击 Setup 0.0.0.exe..."
+          curl -X POST "${{ steps.create_release.outputs.upload_url }}" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/octet-stream" \
+            -F "asset=@dist-electron/盒打击 Setup 0.0.0.exe" \
+            -F "name=BoxAttack-Setup.exe"
+        else
+          echo "盒打击 Setup 0.0.0.exe not found, skipping..."
+        fi
 
     - name: Upload Linux AppImage
-      if: exists('dist-electron/盒打击-0.0.0.AppImage')
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist-electron/盒打击-0.0.0.AppImage
-        asset_name: BoxAttack.AppImage
-        asset_content_type: application/octet-stream
+      run: |
+        if [ -f "dist-electron/盒打击-0.0.0.AppImage" ]; then
+          echo "Uploading 盒打击-0.0.0.AppImage..."
+          curl -X POST "${{ steps.create_release.outputs.upload_url }}" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/octet-stream" \
+            -F "asset=@dist-electron/盒打击-0.0.0.AppImage" \
+            -F "name=BoxAttack.AppImage"
+        else
+          echo "盒打击-0.0.0.AppImage not found, skipping..."
+        fi
 
     - name: Upload macOS DMG
-      if: exists('dist-electron/盒打击-0.0.0.dmg')
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist-electron/盒打击-0.0.0.dmg
-        asset_name: BoxAttack.dmg
-        asset_content_type: application/octet-stream
+      run: |
+        if [ -f "dist-electron/盒打击-0.0.0.dmg" ]; then
+          echo "Uploading 盒打击-0.0.0.dmg..."
+          curl -X POST "${{ steps.create_release.outputs.upload_url }}" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/octet-stream" \
+            -F "asset=@dist-electron/盒打击-0.0.0.dmg" \
+            -F "name=BoxAttack.dmg"
+        else
+          echo "盒打击-0.0.0.dmg not found, skipping..."
+        fi
