@@ -14,7 +14,7 @@
     "electron:dev": "NODE_ENV=development electron .",
     "electron:build": "electron-builder"
   },
-  "main": "electron/main.js",
+  "main": "electron/main.cjs",
   "build": {
     "appId": "com.boxmonitor.app",
     "productName": "盒打击",
@@ -22,7 +22,8 @@
       "output": "dist-electron"
     },
     "files": [
-      "electron/**/*",
+      "electron/**/*.cjs",
+      "electron/**/*.js",
       "dist/**/*"
     ],
     "win": {
