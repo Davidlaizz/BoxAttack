@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     strategy:
       matrix:
         node-version: [18.x]
@@ -33,6 +35,9 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: List dist-electron directory
+      run: ls -la dist-electron/
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -42,6 +47,8 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
     - uses: actions/checkout@v4
@@ -51,6 +58,9 @@ jobs:
       with:
         name: box-attack-builds
         path: dist-electron
+
+    - name: List downloaded artifacts
+      run: ls -la dist-electron/
 
     - name: Create Release
       id: create_release
@@ -63,17 +73,30 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Upload Release Assets
+    - name: Upload Windows Portable EXE
+      if: exists('dist-electron/BoxAttack.exe')
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist-electron/盒打击-0.0.0.exe
+        asset_path: dist-electron/BoxAttack.exe
         asset_name: BoxAttack.exe
         asset_content_type: application/octet-stream
 
+    - name: Upload Windows Installer
+      if: exists('dist-electron/盒打击 Setup 0.0.0.exe')
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: dist-electron/盒打击 Setup 0.0.0.exe
+        asset_name: BoxAttack-Setup.exe
+        asset_content_type: application/octet-stream
+
     - name: Upload Linux AppImage
+      if: exists('dist-electron/盒打击-0.0.0.AppImage')
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -84,6 +107,7 @@ jobs:
         asset_content_type: application/octet-stream
 
     - name: Upload macOS DMG
+      if: exists('dist-electron/盒打击-0.0.0.dmg')
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
