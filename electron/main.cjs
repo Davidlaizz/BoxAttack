@@ -11,16 +11,34 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false,
+      webSecurity: false // 允许加载本地文件
     }
   });
 
-  mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+  const indexPath = path.join(__dirname, '../dist/index.html');
+  console.log('Loading index.html from:', indexPath);
+  
+  mainWindow.loadFile(indexPath)
+    .then(() => {
+      console.log('Successfully loaded index.html');
+    })
+    .catch((error) => {
+      console.error('Failed to load index.html:', error);
+    });
   
   // 开发模式下打开开发者工具
-  if (process.env.NODE_ENV === 'development') {
-    mainWindow.webContents.openDevTools();
-  }
+  mainWindow.webContents.openDevTools();
+  
+  // 监听渲染进程的错误
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+    console.error('Failed to load page:', errorCode, errorDescription);
+  });
+  
+  // 监听渲染进程的控制台消息
+  mainWindow.webContents.on('console-message', (event, level, message) => {
+    console.log('Render process console:', message);
+  });
   
   // 创建系统托盘
   createTray(mainWindow);
