@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -84,33 +88,14 @@ jobs:
           dir dist-electron\win-unpacked\
         }
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Create Release and Upload Assets
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: v${{ github.run_number }}
-        release_name: Release v${{ github.run_number }}
+        name: Release v${{ github.run_number }}
         draft: false
         prerelease: false
-
-    - name: Upload Windows Setup
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist-electron\BoxAttack Setup 0.0.0.exe
-        asset_name: BoxAttack-Setup.exe
-        asset_content_type: application/octet-stream
-
-    - name: Upload Windows Portable
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist-electron\win-unpacked\BoxAttack.exe
-        asset_name: BoxAttack.exe
-        asset_content_type: application/octet-stream
+        files:
+          - dist-electron\BoxAttack Setup 0.0.0.exe
+          - dist-electron\win-unpacked\BoxAttack.exe
+        fail_on_unmatched_files: false
