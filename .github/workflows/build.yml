@@ -95,7 +95,5 @@ jobs:
         name: Release v${{ github.run_number }}
         draft: false
         prerelease: false
-        files:
-          - dist-electron\BoxAttack Setup 0.0.0.exe
-          - dist-electron\win-unpacked\BoxAttack.exe
+        files: dist-electron/*
         fail_on_unmatched_files: false
