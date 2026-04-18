@@ -40,7 +40,7 @@ jobs:
     - name: Build Electron app (Windows only)
       run: |
         echo "Building Electron app..."
-        npm run electron:build -- --win --verbose
+        npm run electron:build -- --win
         echo "Electron app built successfully"
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
