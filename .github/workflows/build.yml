@@ -28,15 +28,37 @@ jobs:
       run: npm install --ignore-scripts
 
     - name: Build frontend
-      run: npm run build
+      run: |
+        echo "Building frontend..."
+        npm run build
+        echo "Frontend build completed"
+        ls -la dist/
 
     - name: Build Electron app
-      run: npm run electron:build -- --win --mac --linux
+      run: |
+        echo "Building Electron app..."
+        echo "Node.js version: $(node -v)"
+        echo "npm version: $(npm -v)"
+        npm run electron:build -- --win --mac --linux --verbose
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: List dist-electron directory
-      run: ls -la dist-electron/
+      run: |
+        echo "Listing dist-electron directory..."
+        ls -la dist-electron/
+        if [ -d "dist-electron/win-unpacked" ]; then
+          echo "Listing win-unpacked directory..."
+          ls -la dist-electron/win-unpacked/
+        fi
+        if [ -d "dist-electron/linux-unpacked" ]; then
+          echo "Listing linux-unpacked directory..."
+          ls -la dist-electron/linux-unpacked/
+        fi
+        if [ -d "dist-electron/mac" ]; then
+          echo "Listing mac directory..."
+          ls -la dist-electron/mac/
+        fi
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
