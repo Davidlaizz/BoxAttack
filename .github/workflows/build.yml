@@ -8,12 +8,10 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    runs-on: windows-latest
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [20.x]
 
     steps:
     - uses: actions/checkout@v4
@@ -25,52 +23,28 @@ jobs:
         cache: 'npm'
 
     - name: Install dependencies
-      run: npm install --ignore-scripts
+      run: npm install
 
     - name: Build frontend
-      run: |
-        echo "Building frontend..."
-        npm run build
-        echo "Frontend build completed"
-        ls -la dist/
+      run: npm run build
 
-    - name: Build Electron app
-      run: |
-        echo "Building Electron app..."
-        echo "Node.js version: $(node -v)"
-        echo "npm version: $(npm -v)"
-        npm run electron:build -- --win --mac --linux --verbose
+    - name: Build Electron app (Windows only)
+      run: npm run electron:build -- --win
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: List dist-electron directory
-      run: |
-        echo "Listing dist-electron directory..."
-        ls -la dist-electron/
-        if [ -d "dist-electron/win-unpacked" ]; then
-          echo "Listing win-unpacked directory..."
-          ls -la dist-electron/win-unpacked/
-        fi
-        if [ -d "dist-electron/linux-unpacked" ]; then
-          echo "Listing linux-unpacked directory..."
-          ls -la dist-electron/linux-unpacked/
-        fi
-        if [ -d "dist-electron/mac" ]; then
-          echo "Listing mac directory..."
-          ls -la dist-electron/mac/
-        fi
+      run: dir dist-electron\
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: box-attack-builds
+        name: box-attack-windows
         path: dist-electron/*
 
   release:
     needs: build
-    runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+    runs-on: windows-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
     - uses: actions/checkout@v4
@@ -78,11 +52,11 @@ jobs:
     - name: Download artifacts
       uses: actions/download-artifact@v4
       with:
-        name: box-attack-builds
+        name: box-attack-windows
         path: dist-electron
 
     - name: List downloaded artifacts
-      run: ls -la dist-electron/
+      run: dir dist-electron\
 
     - name: Create Release
       id: create_release
@@ -95,54 +69,23 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Upload Windows Portable EXE
-      run: |
-        if [ -f "dist-electron/BoxAttack.exe" ]; then
-          echo "Uploading BoxAttack.exe..."
-          curl -X POST "${{ steps.create_release.outputs.upload_url }}" \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/octet-stream" \
-            -F "asset=@dist-electron/BoxAttack.exe" \
-            -F "name=BoxAttack.exe"
-        else
-          echo "BoxAttack.exe not found, skipping..."
-        fi
+    - name: Upload Windows artifacts
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: dist-electron\BoxAttack Setup 0.0.0.exe
+        asset_name: BoxAttack-Setup.exe
+        asset_content_type: application/octet-stream
 
-    - name: Upload Windows Installer
-      run: |
-        if [ -f "dist-electron/盒打击 Setup 0.0.0.exe" ]; then
-          echo "Uploading 盒打击 Setup 0.0.0.exe..."
-          curl -X POST "${{ steps.create_release.outputs.upload_url }}" \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/octet-stream" \
-            -F "asset=@dist-electron/盒打击 Setup 0.0.0.exe" \
-            -F "name=BoxAttack-Setup.exe"
-        else
-          echo "盒打击 Setup 0.0.0.exe not found, skipping..."
-        fi
-
-    - name: Upload Linux AppImage
-      run: |
-        if [ -f "dist-electron/盒打击-0.0.0.AppImage" ]; then
-          echo "Uploading 盒打击-0.0.0.AppImage..."
-          curl -X POST "${{ steps.create_release.outputs.upload_url }}" \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/octet-stream" \
-            -F "asset=@dist-electron/盒打击-0.0.0.AppImage" \
-            -F "name=BoxAttack.AppImage"
-        else
-          echo "盒打击-0.0.0.AppImage not found, skipping..."
-        fi
-
-    - name: Upload macOS DMG
-      run: |
-        if [ -f "dist-electron/盒打击-0.0.0.dmg" ]; then
-          echo "Uploading 盒打击-0.0.0.dmg..."
-          curl -X POST "${{ steps.create_release.outputs.upload_url }}" \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/octet-stream" \
-            -F "asset=@dist-electron/盒打击-0.0.0.dmg" \
-            -F "name=BoxAttack.dmg"
-        else
-          echo "盒打击-0.0.0.dmg not found, skipping..."
-        fi
+    - name: Upload Windows portable
+      if: true
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: dist-electron\win-unpacked\BoxAttack.exe
+        asset_name: BoxAttack.exe
+        asset_content_type: application/octet-stream
