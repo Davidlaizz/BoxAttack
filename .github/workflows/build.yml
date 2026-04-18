@@ -96,7 +96,6 @@ jobs:
         prerelease: false
 
     - name: Upload Windows Setup
-      if: Test-Path "dist-electron\BoxAttack Setup 0.0.0.exe"
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -107,7 +106,6 @@ jobs:
         asset_content_type: application/octet-stream
 
     - name: Upload Windows Portable
-      if: Test-Path "dist-electron\win-unpacked\BoxAttack.exe"
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
