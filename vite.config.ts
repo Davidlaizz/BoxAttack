@@ -5,6 +5,7 @@ import { traeBadgePlugin } from 'vite-plugin-trae-solo-badge';
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: './', // 使用相对路径，确保在Electron中正确加载资源
   build: {
     sourcemap: 'hidden',
     outDir: 'dist',
